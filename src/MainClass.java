@@ -14,25 +14,32 @@ public class MainClass extends PApplet {
     }
 
     ArrayList<Pipe> Pipes = new ArrayList<>();
-    Bird b;
+    ArrayList<Bird> Birds = new ArrayList<>(100);
     int pipeFrequency;
+    int birdPopulation;
 
     public void setup() {
         processing = this;
 
         surface.setSize(900, 600);
-        b = new Bird();
-        Pipes.add(new Pipe());
+        birdPopulation = 100;
 
-        //MainClass.processing.frameRate(20);
+        Pipes.add(new Pipe());
+        nextGen();     //   set up and initial generation
+
+
     }
 
     public void draw() {
+
         pipeFrequency++;
         background(0);
-        b.showBird();
-        b.checkForDead(Pipes);
-        b.update();
+        for (Bird b : Birds) {
+            b.showBird();
+            b.checkForDead(Pipes);
+            b.update();
+            b.lift(Pipes);
+        }
         for (Pipe p : Pipes) {
             p.showPipe();
             p.movePipe();
@@ -49,17 +56,8 @@ public class MainClass extends PApplet {
             Pipes.add(new Pipe());
             pipeFrequency = 0;
         }
+        checkForNextGen();
 
-        if (keyPressed) {
-
-            if (keyCode == 38) {
-                b.lift();
-            }
-            if (keyCode == 40) {   //  only for testing
-                b.drop();
-            }
-
-        }
     }
 
     public void keyPressed() {
@@ -72,7 +70,36 @@ public class MainClass extends PApplet {
 
     }
 
+    public void nextGen() {
+        for (int i = 0; i < birdPopulation; i++) {
+            Birds.add(new Bird());
+        }
+
+    }
+
+    public void resetPipes () {
+        Pipes.removeAll(Pipes);
+        pipeFrequency = 0;
+        Pipes.add(new Pipe());
+    }
+
+    public void checkForNextGen() {
+        int count = 0;
+        for (int i = 0; i < Birds.size(); i++) {
+            if (!Birds.get(i).alive) {
+                count++;
+            }
+        }
+        //println(count);
+        if (count == birdPopulation) {  //population is dead.
+            Birds.removeAll(Birds);
+            resetPipes();
+            nextGen();
+        }
+    }
 }
+
+
 
 
 

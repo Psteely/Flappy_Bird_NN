@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SteelyNeuralNetwork">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../SteelyNeuralNetwork/out/artifacts/SteelyNeuralNetwork_jar/SteelyNeuralNetwork.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
