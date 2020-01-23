@@ -1,6 +1,7 @@
 import processing.core.PApplet;
 
 import java.util.ArrayList;
+import java.util.Collections;
 //import processing.data.Table;
 //import processing.data.TableRow;
 //
@@ -14,23 +15,32 @@ public class MainClass extends PApplet {
     }
 
     ArrayList<Pipe> Pipes = new ArrayList<>();
-    ArrayList<Bird> Birds = new ArrayList<>(100);
+    int birdPopulation = 600;
+    ArrayList<Bird> Birds = new ArrayList<>(birdPopulation);
     int pipeFrequency;
-    int birdPopulation;
+    int generation;
+    boolean dead;
+    int score = 0;
 
     public void setup() {
         processing = this;
 
         surface.setSize(900, 600);
-        birdPopulation = 100;
+
+        generation = 1;
+
+
 
         Pipes.add(new Pipe());
-        nextGen();     //   set up and initial generation
-
+        //nextGen();     //   set up and initial generation
+        for (int i = 0; i < birdPopulation; i++) {
+            Birds.add(new Bird());
+        }
 
     }
 
     public void draw() {
+
 
         pipeFrequency++;
         background(0);
@@ -43,7 +53,11 @@ public class MainClass extends PApplet {
         for (Pipe p : Pipes) {
             p.showPipe();
             p.movePipe();
-            p.pipeDone();
+            dead = p.pipeDone();
+            if (dead) {
+                score ++;
+                MainClass.processing.println("Score = " + score);
+            }
         }
         for (int i = 0; i < Pipes.size(); i++) {
             if (!Pipes.get(i).pipeAlive) {
@@ -52,7 +66,7 @@ public class MainClass extends PApplet {
             }
         }
 
-        if (pipeFrequency > 150) {
+        if (pipeFrequency > 100) {
             Pipes.add(new Pipe());
             pipeFrequency = 0;
         }
@@ -70,17 +84,37 @@ public class MainClass extends PApplet {
 
     }
 
-    public void nextGen() {
+    public void nextGen(NeuralNetwork nn_) {
+        Birds = null;
+        generation++;
+        score = 0;
+        System.out.println("Generation = " + generation);
+        Birds = new ArrayList<>(birdPopulation);
         for (int i = 0; i < birdPopulation; i++) {
-            Birds.add(new Bird());
+          // NeuralNetwork nn1 = new NeuralNetwork(nn_);
+           NeuralNetwork nn1 = NeuralNetwork.nncopy(nn_);
+           nn1.mutate(.5f);
+            Birds.add(new Bird(nn1));
         }
 
     }
 
-    public void resetPipes () {
+    public void resetPipes() {
         Pipes.removeAll(Pipes);
         pipeFrequency = 0;
         Pipes.add(new Pipe());
+    }
+
+    Bird bestBird() {
+        Bird bestBird = new Bird();
+        int highScore = 0;
+        for (Bird b : Birds) {
+            if (b.score > highScore) {
+                highScore = b.score;
+                bestBird = b;
+            }
+        }
+        return bestBird;
     }
 
     public void checkForNextGen() {
@@ -94,7 +128,17 @@ public class MainClass extends PApplet {
         if (count == birdPopulation) {  //population is dead.
             Birds.removeAll(Birds);
             resetPipes();
-            nextGen();
+            //  Which is our best bird
+
+            Bird topBird;
+            topBird = bestBird();
+            //println(topBird.score);
+
+
+            NeuralNetwork nnn = new NeuralNetwork(topBird.nn);
+
+            nextGen(nnn);
+            //PApplet.println("new gen");
         }
     }
 }

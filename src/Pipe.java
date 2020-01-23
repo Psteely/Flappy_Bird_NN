@@ -11,6 +11,7 @@ public class Pipe {
     int pipeGap;
     int pipeGapStart;
     boolean pipeAlive = true;
+    int score;
 
 
     Pipe() {
@@ -34,10 +35,13 @@ public class Pipe {
         pos = pos.add(vel);
     }
 
-    void pipeDone() {
+    boolean pipeDone() {
         if (pos.x < -30) {
             pipeAlive = false;
+            return true;
+
         }
+        return false;
     }
 
 }
